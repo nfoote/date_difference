@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script>
+
+        let date1 = new Object();
+        let date2 = new Object();
+        const MAX_DAYS = 31;
+        const MAX_MONTHS = 12;
+        const MAX_YEAR = 2010;
+        const MIN_YEAR = 1900;
+        const YEAR = 365;
+        const MONTHS = new Map([
+        [1, 31], [2, 28], [3, 31],
+        [4, 30], [5, 31], [6, 30],
+        [7, 31], [8, 31], [9, 30],
+        [10, 31], [11, 30], [12, 31]
+        ]);
+
+        let compare = () => {
+            let input1 = document.getElementById("firstDate").value.split(" ");
+            let input2 = document.getElementById("secondDate").value.split(" ");
+
+            date1.day = Number(input1[0]);
+            date1.month = Number(input1[1]);
+            date1.year = Number(input1[2]);
+            date2.day = Number(input2[0]);
+            date2.month = Number(input2[1]);
+            date2.year = Number(input2[2]);
+
+            document.getElementById("result").innerHTML = "Difference: " + 
+                     processComparison ( date1, date2 ) + " days";
+        };
+
+        let processComparison = ( date1, date2 ) => {
+            
+            if(validateInput(date1, date2)) {
+                let totalDays = daysRemaining( date1 )
+                 + daysPast( date2 )
+                 + daysBetweenYears( date1, date2 );
+                 return totalDays;
+            } else {
+                return 0;
+            }
+        }
+
+        let validateInput = ( date1, date2 ) => {
+
+            if(emptyProperties(date1) || emptyProperties(date2)) {
+                 alert("Enter all values");
+                 return false
+            }
+
+            if (date1.day > MAX_DAYS || date2.day > MAX_DAYS) {
+                alert("Days must be less than 31");
+                return false;
+            }
+
+            if(isLeapYear(date1.year) && date1.day === 29 && date1.month === 2 ||
+                isLeapYear(date2.year) && date2.day === 29 && date2.month === 2) {
+                return true;
+            }
+
+            if(date1.day > MONTHS.get(date1.month) ||
+                date2.day > MONTHS.get(date2.month)){
+                alert("Too many days for month entered");
+                return false;
+            }
+            
+            if (date1.month > MAX_MONTHS || date2.month > MAX_MONTHS) {
+                alert("Month must be less than 12");
+                return false;
+            }
+
+            if (date1.year > MAX_YEAR ||
+                date2.year > MAX_YEAR ||
+                date1.year < MIN_YEAR ||
+                date2.year < MIN_YEAR ||
+                date1.year > date2.year) {
+                alert("Year must be between 1900 and 2010");
+                return false;
+            }
+            return true;
+        };
+        
+        let emptyProperties = ( obj ) => {
+            for (let k in obj) {
+                if (obj[k] == " " || obj[k] == null) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        // Count the days remaining up until the end of the first year
+        let daysRemaining = ( date1 ) => {
+            let remaining = 0;
+            remaining += MONTHS.get(date1.month) - date1.day;
+
+            for(let i=date1.month +1; i <= MAX_MONTHS; i++){
+                remaining += MONTHS.get(i);
+            }
+            return remaining;
+        };
+        
+        //Get the number of days already past in second date
+        let daysPast = ( date2 ) => {        
+            let past = 0;
+            past += date2.day;
+            for(let i=1; i < date2.month; i++){
+                past += MONTHS.get(i);
+            }
+            return past;
+        };
+
+        //Get the number of days between two years
+        let daysBetweenYears = (date1, date2) => {
+            let extraDays=0;
+            let range = date2.year - date1.year - 1;
+            for (let i = date1.year; i <= date2.year; i++){
+                if (isLeapYear(i)){
+                    extraDays+=1;
+                }
+            }
+            return (range * YEAR) + extraDays;
+        };
+
+        //Returns true if leap year
+        let isLeapYear = ( year ) => {
+            return ((year % 4 == 0) && (year % 100 != 0)) || (year % 400 == 0);
+        };
+
+        //test data to exercise the application.
+        /**
+         *  Date 1      Date 2
+         *  09 05 1989  09 05 2010
+         *  29 02 2004  20 01 2008 
+         *  25 01 1960  20 01 1995
+         *  17 08 1999  29 12 2009
+        */
+    
+    </script>
+  </head>
+  <body>
+    <input id="firstDate"  maxlength="10" minlength="10"/>
+    <input id="secondDate" maxlength="10" minlength="10" />
+    <button onclick="compare()" >Compare</button>
+    <p id="result"></p>
+  </body>
+</html>
